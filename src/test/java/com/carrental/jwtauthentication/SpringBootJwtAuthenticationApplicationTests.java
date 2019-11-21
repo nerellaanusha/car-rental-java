@@ -1,4 +1,4 @@
-package com.grokonez.jwtauthentication;
+package com.carrental.jwtauthentication;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
