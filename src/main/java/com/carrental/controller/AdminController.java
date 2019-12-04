@@ -104,7 +104,7 @@ public class AdminController {
 	@PostMapping("/addCoupon")
 	public ResponseEntity<?> addCoupon(@RequestBody Coupon coupon){
 		try {
-			if(this.couponDao.getCouponByCode(coupon) == null) {
+			if(this.couponDao.getCouponByCode(coupon.getCouponCode()) == null) {
 				if(this.couponDao.addCoupon(coupon)!= null) {
 					return new ResponseEntity<>(new ResponseMessage("Coupon Added successfully!"), HttpStatus.OK);
 				}
@@ -121,7 +121,7 @@ public class AdminController {
 	public ResponseEntity<?> editCoupon(@RequestBody Coupon coupon){
 		try {
 			
-			if(this.couponDao.getCouponByCode(coupon) == null) {
+			if(this.couponDao.getCouponByCode(coupon.getCouponCode()) == null) {
 				if(this.couponDao.updateCoupon(coupon)!= null) {
 					return new ResponseEntity<>(new ResponseMessage("Coupon Updated successfully!"), HttpStatus.OK);
 				}

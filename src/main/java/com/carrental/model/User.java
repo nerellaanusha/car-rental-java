@@ -20,11 +20,8 @@ public class User{
 	@Transient
     public static final String SEQUENCE_NAME = "users_sequence";
 
-   
-    
     private String firstName;
     
-  
     private String lastName;
     
     private long seq;

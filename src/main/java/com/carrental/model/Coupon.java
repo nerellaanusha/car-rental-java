@@ -7,7 +7,7 @@ public class Coupon {
 	
 	public String couponCode;
 	
-	public Integer dicountPercentage;
+	public Integer discountPercentage;
 	
 	public Integer dollarDiscount;
 
@@ -20,11 +20,11 @@ public class Coupon {
 	}
 
 	public Integer getDicountPercentage() {
-		return dicountPercentage;
+		return discountPercentage;
 	}
 
 	public void setDicountPercentage(Integer dicountPercentage) {
-		this.dicountPercentage = dicountPercentage;
+		this.discountPercentage = dicountPercentage;
 	}
 	
 	

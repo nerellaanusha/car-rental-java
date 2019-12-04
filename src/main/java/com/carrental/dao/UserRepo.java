@@ -17,7 +17,7 @@ public class UserRepo {
 	
 	public User findByUserName(String userName) {
 		Query query = new Query();
-		query.addCriteria(Criteria.where("username").is(userName));
+		query.addCriteria(Criteria.where("userName").is(userName));
 		return mongoTemplate.findOne(query, User.class);
 	}
 	

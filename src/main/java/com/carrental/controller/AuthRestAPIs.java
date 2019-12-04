@@ -69,8 +69,9 @@ public class AuthRestAPIs {
 
 		String jwt = jwtProvider.generateJwtToken(authentication);
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		User user = userRepo.findByUserName(loginRequest.getUsername());
 
-		return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getUsername(), userDetails.getAuthorities()));
+		return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getUsername(), userDetails.getAuthorities(),user.getId(),user.getFirstName()));
 	}
 
 	@PostMapping("/signup")
@@ -138,8 +139,10 @@ public class AuthRestAPIs {
 
 		String jwt = jwtProvider.generateJwtToken(authentication);
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		User user = userRepo.findByUserName(signUpRequest.getUserName());
 
-		return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getUsername(), userDetails.getAuthorities()));
+		return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getUsername(), userDetails.getAuthorities(),
+				user.getId(),user.getFirstName()));
 		
 		//return new ResponseEntity<>(new ResponseMessage("User registered successfully!"), HttpStatus.OK);
 		

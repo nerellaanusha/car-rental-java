@@ -32,16 +32,16 @@ public class CouponDao {
 		Coupon vehicle = this.mongoTemplate.findOne(couponQuery,Coupon.class);
 		
 		Update update = new Update();
-		update.set("dicountPercentage", coupon.getDicountPercentage());
+		update.set("discountPercentage", coupon.getDicountPercentage());
 		update.set("dollarDiscount", coupon.getDicountPercentage());
 		
 		this.mongoTemplate.updateFirst(couponQuery, update, Coupon.class);
 		return this.mongoTemplate.findOne(couponQuery,Coupon.class);
 	}
 	
-	public Coupon getCouponByCode(Coupon coupon) {
+	public Coupon getCouponByCode(String couponCode) {
 		Query couponQuery = new Query();
-		couponQuery.addCriteria(Criteria.where("couponCode").is(coupon.getCouponCode()));
+		couponQuery.addCriteria(Criteria.where("couponCode").is(couponCode));
 		return this.mongoTemplate.findOne(couponQuery,Coupon.class);
 	}
 	
