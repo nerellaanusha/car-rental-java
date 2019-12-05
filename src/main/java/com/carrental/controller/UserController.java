@@ -19,13 +19,16 @@ import org.springframework.web.bind.annotation.RestController;
 import com.carrental.dao.BookingDao;
 import com.carrental.dao.CarRepo;
 import com.carrental.dao.CouponDao;
+import com.carrental.dao.QuoteDao;
 import com.carrental.message.request.BookingReq;
 import com.carrental.message.request.HomePageRequest;
+import com.carrental.message.request.QuoteReq;
 import com.carrental.message.response.CarResponse;
 import com.carrental.message.response.ResponseMessage;
 import com.carrental.model.Booking;
 import com.carrental.model.Car;
 import com.carrental.model.Coupon;
+import com.carrental.model.Quote;
 import com.carrental.security.services.NextSequenceService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -44,6 +47,9 @@ public class UserController {
 	
 	@Autowired
 	BookingDao bookingDao;
+	
+	@Autowired
+	QuoteDao quoteDao;
 	
 	@Autowired
     private JavaMailSender javaMailSender;
@@ -132,6 +138,47 @@ public class UserController {
 		return bookingDao.getBookingsByCustomer(customerId);
 	}
 	
+	
+	@PostMapping("/submitQuote")
+	public ResponseEntity<?> submitQuote(@RequestBody QuoteReq quoteReq){
+		
+		Quote quote = new Quote();
+		quote.setContactNumber(quoteReq.getContactNumber());
+		quote.setCustomerId(quoteReq.getCustomerId());
+		quote.setDropOffDate(quoteReq.getDropOffDate());
+		quote.setDropOffloc(quoteReq.getDropOffloc());
+		quote.setPickUpDate(quoteReq.getPickUpDate());
+		quote.setPickUpLoc(quoteReq.getPickUpLoc());
+		quote.setEmail(quoteReq.getEmail());
+		quote.setFirstName(quoteReq.getFirstName());
+		quote.setLastName(quoteReq.getLastName());
+		quote.setQuoteStatus("PENDING");
+		quote.setVin(quoteReq.getVin());
+		quote.setTotalPrice(quoteReq.getActualPrice());
+		quote.setUserPrice(quoteReq.getUserPrice());
+		quote.setEmail(quoteReq.getEmail());
+		quote.setQuoteId(nextSequenceService.getNextSequence(Quote.SEQUENCE_NAME));
+		
+		quoteDao.submitQuote(quote);
+		
+		try {
+			SimpleMailMessage msg = new SimpleMailMessage();
+	        msg.setTo(quoteReq.getEmail());
+
+	        msg.setSubject("Car Rental - Quote Submitted");
+	        StringBuilder result = new StringBuilder();
+	        result.append("Your quote is submitted. Quote Reference Number:"+quote.getQuoteId());
+	        result.append(System.getProperty("line.separator"));
+	        result.append("Please allow 2-3 business days to get response and you will receive an email when quote is approved/declined");
+	        msg.setText(result.toString());
+
+	        javaMailSender.send(msg);
+			}catch(Exception e) {
+				return new ResponseEntity<>(new ResponseMessage("Error While Sending Email"), HttpStatus.PARTIAL_CONTENT);
+			}
+		
+		return new ResponseEntity<>(new ResponseMessage("Quote Submitted Succesfully"), HttpStatus.OK);
+	}
 	
 	
 	
