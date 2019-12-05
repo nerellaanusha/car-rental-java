@@ -91,38 +91,13 @@ public class AuthRestAPIs {
 					HttpStatus.CONFLICT);
 		}
 
-		// Creating user's account
+	
 		User user = new User(signUpRequest.getFirstName(), signUpRequest.getLastName(),signUpRequest.getUserName(),
 				signUpRequest.getEmail(),encoder.encode(signUpRequest.getPassword()));
 		
 		user.setId(nextSequenceService.getNextSequence(User.SEQUENCE_NAME));
 		user.setRole("ROLE_USER");
 
-//		Set<String> strRoles = signUpRequest.getRole();
-//		Set<Role> roles = new HashSet<>();
-//
-//		strRoles.forEach(role -> {
-//			switch (role) {
-//			case "admin":
-//				Role adminRole = roleRepository.findByName(RoleName.ROLE_ADMIN)
-//						.orElseThrow(() -> new RuntimeException("Fail! -> Cause: User Role not find."));
-//				roles.add(adminRole);
-//
-//				break;
-//			case "pm":
-//				Role pmRole = roleRepository.findByName(RoleName.ROLE_PM)
-//						.orElseThrow(() -> new RuntimeException("Fail! -> Cause: User Role not find."));
-//				roles.add(pmRole);
-//
-//				break;
-//			default:
-//				Role userRole = roleRepository.findByName(RoleName.ROLE_USER)
-//						.orElseThrow(() -> new RuntimeException("Fail! -> Cause: User Role not find."));
-//				roles.add(userRole);
-//			}
-//		});
-
-		//user.setRoles(roles);
 		userRepository.save(user);
 
 		
