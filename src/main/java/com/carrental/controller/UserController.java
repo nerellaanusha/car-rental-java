@@ -2,6 +2,7 @@ package com.carrental.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 
 import com.carrental.dao.BookingDao;
 import com.carrental.dao.CarRepo;
@@ -24,7 +26,10 @@ import com.carrental.message.request.BookingReq;
 import com.carrental.message.request.HomePageRequest;
 import com.carrental.message.request.QuoteReq;
 import com.carrental.message.response.CarResponse;
+import com.carrental.message.response.NearByCar;
 import com.carrental.message.response.ResponseMessage;
+import com.carrental.message.response.ZipCodeResponse;
+import com.carrental.message.response.Zipcode;
 import com.carrental.model.Booking;
 import com.carrental.model.Car;
 import com.carrental.model.Coupon;
@@ -57,10 +62,22 @@ public class UserController {
 	
 	
 	@PostMapping("/getCarsOnZipcode")
-	public List<CarResponse> getCarsByZipcode(@RequestBody HomePageRequest homepageReq){
+	public ResponseEntity<?> getCarsByZipcode(@RequestBody HomePageRequest homepageReq){
 		
-		List<Car> cars = this.carRepo.getCarsByZipcode(homepageReq.getPickUpLoc());
 		List<CarResponse> carsResp= new ArrayList<CarResponse>();
+		try {
+		
+		String apiKey = "ogNnaGqAGPRh5dkjowTER8gLUdnQwgYqF69PEf2EttNL5f7rEdDmVf0QkpkJT0D9";
+		String uri = "https://www.zipcodeapi.com/rest/"+apiKey+"/radius.json/"+homepageReq.getPickUpLoc()+"/20/mile";
+	     
+	    RestTemplate restTemplate = new RestTemplate();
+	    ZipCodeResponse result = restTemplate.getForObject(uri, ZipCodeResponse.class);
+	    List<Zipcode> zipcodeObjs = result.getZip_codes();
+	    List<Integer> zipcodes = zipcodeObjs.stream().map(zip -> Integer.valueOf(zip.getZip_code())).collect(Collectors.toList());
+	    zipcodes.add(homepageReq.getPickUpLoc()); 
+	  
+	    List<Car> cars = this.carRepo.getCarsByZipcode(zipcodes);
+		
 		
 		if(cars.size() > 1) {
 			long difference =  (homepageReq.getDropOffDate().getTime()-homepageReq.getPickUpDate().getTime())/86400000;
@@ -68,23 +85,40 @@ public class UserController {
 	        
 	        CarResponse carRes = null;
 	        for(Car car: cars) {
-	        	carRes = new CarResponse();
-	        	carRes.setBaggage(car.getBaggage());
-	        	carRes.setCapacity(car.getCapacity());
-	        	carRes.setCarMake(car.getCarMake());
-	        	carRes.setCarModel(car.getCarModel());
-	        	carRes.setImage(car.getImage());
-	        	carRes.setPrice(car.getPrice());
-	        	carRes.setTotalPrice(days * car.getPrice());
-	        	carRes.setTotalPriceWithTax(days * car.getPrice()  +  (days * car.getPrice()* 0.10));
-	        	carRes.setType(car.getType());
-	        	carRes.setVin(car.getVin());
-	        carRes.setTax(new Float(10));
-	        	carRes.setZipcode(car.getZipcode());
-	        	carsResp.add(carRes);
+		        	if(homepageReq.getPickUpLoc().equals(car.getZipcode())) {
+		        	carRes = new CarResponse();
+		        	carRes.setBaggage(car.getBaggage());
+		        	carRes.setCapacity(car.getCapacity());
+		        	carRes.setCarMake(car.getCarMake());
+		        	carRes.setCarModel(car.getCarModel());
+		        	carRes.setImage(car.getImage());
+		        	carRes.setPrice(car.getPrice());
+		        	carRes.setTotalPrice(days * car.getPrice());
+		        	carRes.setTotalPriceWithTax(days * car.getPrice()  +  (days * car.getPrice()* 0.10));
+		        	carRes.setType(car.getType());
+		        	carRes.setVin(car.getVin());
+		        carRes.setTax(new Float(10));
+		        	carRes.setZipcode(car.getZipcode());
+		        	for(Car veh: cars) {
+		        		if(veh.getCarModel().equalsIgnoreCase(car.getCarModel()) && !veh.getZipcode().equals(car.getZipcode())) {
+		        			NearByCar nearByCar = new NearByCar();
+		        			nearByCar.setPrice(veh.getPrice());
+		        			nearByCar.setZipcode(veh.getZipcode());
+		        			carRes.getNearByCars().add(nearByCar);
+		        		}	
+		        	}
+		        	
+		        	carsResp.add(carRes);
+		        }
 	        }
 		}
-		return carsResp;
+		}catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<>(new ResponseMessage("Error While Fetching Cars"), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	        
+	            
+		return new ResponseEntity<>(new ResponseMessage("Found Cars"), HttpStatus.OK).ok(carsResp);  
 	}
 	
 	@GetMapping("/coupon/{code}")

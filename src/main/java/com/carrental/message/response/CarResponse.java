@@ -1,5 +1,8 @@
 package com.carrental.message.response;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class CarResponse {
 
 	long vin;
@@ -24,8 +27,18 @@ public class CarResponse {
 	
 	double totalPriceWithTax;
 	
+	List<NearByCar> nearByCars = new ArrayList<NearByCar>();
 	
 	
+
+	public List<NearByCar> getNearByCars() {
+		return nearByCars;
+	}
+
+	public void setNearByCars(List<NearByCar> nearByCars) {
+		this.nearByCars = nearByCars;
+	}
+
 	public double getTotalPriceWithTax() {
 		return totalPriceWithTax;
 	}

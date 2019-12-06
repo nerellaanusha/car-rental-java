@@ -24,9 +24,9 @@ public class CarRepo {
 		return car;
 	}
 	
-	public List<Car> getCarsByZipcode(Integer zipcode){
+	public List<Car> getCarsByZipcode(List<Integer> zipcodes){
 		Query zipcodeQuery = new Query();
-		zipcodeQuery.addCriteria(Criteria.where("zipcode").is(zipcode));
+		zipcodeQuery.addCriteria(Criteria.where("zipcode").in(zipcodes));
 		return this.mongoTemplate.find(zipcodeQuery,Car.class);
 	}
 	
